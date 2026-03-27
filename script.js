@@ -1,3 +1,8 @@
+const supabaseUrl = 'https://wrbiiwdsgqbxlbcwyfgq.supabase.co';
+const supabaseKey = 'sb_publishable_xSr91dyTtRctRmnW4Ip5Kg_zOu4PkEO';
+const { createClient } = supabase;
+const db = createClient(supabaseUrl, supabaseKey);
+
 const sampleQuestion = {
   id: 1,
   question_text: '小明买了3支笔，每支4元，一共多少钱？',
@@ -52,12 +57,12 @@ function bindEvents(q) {
     }
   });
 
-  document.getElementById('btnA').addEventListener('click', () => {
-    submitAnswer('A', q);
+  document.getElementById('btnA').addEventListener('click', async () => {
+    await submitAnswer('A', q);
   });
 
-  document.getElementById('btnB').addEventListener('click', () => {
-    submitAnswer('B', q);
+  document.getElementById('btnB').addEventListener('click', async () => {
+    await submitAnswer('B', q);
   });
 }
 
@@ -67,18 +72,18 @@ function startTimer(seconds) {
   timeLeft = seconds;
   document.getElementById('timer').textContent = timeLeft;
 
-  timerId = setInterval(() => {
+  timerId = setInterval(async () => {
     timeLeft -= 1;
     document.getElementById('timer').textContent = timeLeft;
 
     if (timeLeft <= 0) {
       clearInterval(timerId);
-      submitAnswer('timeout', sampleQuestion);
+      await submitAnswer('timeout', sampleQuestion);
     }
   }, 1000);
 }
 
-function submitAnswer(answer, q) {
+async function submitAnswer(answer, q) {
   if (hasSubmitted) return;
   hasSubmitted = true;
 
@@ -106,15 +111,26 @@ function submitAnswer(answer, q) {
     page_time_ms: pageTimeMs
   };
 
-  console.log('本题记录:', payload);
-
-  if (answer === 'timeout') {
-    document.getElementById('status').textContent = '时间到，系统已自动记录';
-  } else {
-    document.getElementById('status').textContent = `已记录你的答案：${answer}`;
-  }
+  console.log('准备写入数据库:', payload);
 
   document.getElementById('btnA').disabled = true;
   document.getElementById('btnB').disabled = true;
   document.getElementById('source-btn').disabled = true;
+  document.getElementById('status').textContent = '正在保存...';
+
+  const { error } = await db.from('responses').insert([payload]);
+
+  if (error) {
+    console.error('保存失败:', error);
+    document.getElementById('status').textContent = '保存失败，请查看控制台';
+    return;
+  }
+
+  console.log('保存成功');
+
+  if (answer === 'timeout') {
+    document.getElementById('status').textContent = '时间到，系统已自动保存';
+  } else {
+    document.getElementById('status').textContent = `已保存你的答案：${answer}`;
+  }
 }
