@@ -39,6 +39,17 @@ let sourceTimeMs = 0;
 
 let hasSubmitted = false;
 
+const participantId = getParticipantId();
+
+function getParticipantId() {
+  let existing = sessionStorage.getItem('participant_id');
+  if (existing) return existing;
+
+  const newId = 'p_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+  sessionStorage.setItem('participant_id', newId);
+  return newId;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderQuestion(currentQuestion);
   bindEvents();
@@ -138,7 +149,7 @@ async function submitAnswer(answer) {
   const correct = answer === currentQuestion.correct_answer;
 
   const payload = {
-    participant_id: 'test_user_001',
+    participant_id: participantId,
     condition_time: 'high',
     condition_confidence: 'high',
     question_id: currentQuestion.id,
