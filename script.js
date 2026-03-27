@@ -26,7 +26,8 @@ const questions = [
   }
 ];
 
-let currentQuestion = questions[0];
+let currentIndex = 0;
+let currentQuestion = questions[currentIndex];
 
 let timerId = null;
 let timeLeft = 0;
@@ -43,11 +44,30 @@ document.addEventListener('DOMContentLoaded', () => {
   bindEvents(currentQuestion);
 });
 
+function resetQuestionState() {
+  clearInterval(timerId);
+
+  clickedSource = false;
+  sourceOpenedAt = null;
+  sourceTimeMs = 0;
+  hasSubmitted = false;
+
+  document.getElementById('source-box').style.display = 'none';
+  document.getElementById('status').textContent = '';
+
+  document.getElementById('btnA').disabled = false;
+  document.getElementById('btnB').disabled = false;
+  document.getElementById('source-btn').disabled = false;
+}
+
 function renderQuestion(q) {
+  resetQuestionState();
+
+  currentQuestion = q;
+
   document.getElementById('question').textContent = q.question_text;
   document.getElementById('ai-answer-text').textContent = q.llm_answer;
   document.getElementById('source-box').textContent = q.source_text;
-  document.getElementById('status').textContent = '';
   document.getElementById('optionA').textContent = q.option_a;
   document.getElementById('optionB').textContent = q.option_b;
 
@@ -147,8 +167,19 @@ async function submitAnswer(answer, q) {
   console.log('保存成功');
 
   if (answer === 'timeout') {
-    document.getElementById('status').textContent = '时间到，系统已自动保存';
-  } else {
-    document.getElementById('status').textContent = `已保存你的答案：${answer}`;
-  }
+  document.getElementById('status').textContent = '时间到，系统已自动保存';
+} else {
+  document.getElementById('status').textContent = `已保存你的答案：${answer}`;
+}
+
+if (currentIndex < questions.length - 1) {
+  setTimeout(() => {
+    currentIndex += 1;
+    renderQuestion(questions[currentIndex]);
+  }, 1000);
+} else {
+  document.getElementById('status').textContent = '实验完成，所有题目已保存';
+  document.getElementById('timer').textContent = '0';
+}
+
 }
