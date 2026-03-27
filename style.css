@@ -43,3 +43,13 @@ button {
   margin-top: 24px;
   font-size: 24px;
 }
+
+.option-row {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.option-text {
+  font-size: 28px;
+}
