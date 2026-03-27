@@ -3,14 +3,30 @@ const supabaseKey = 'sb_publishable_xSr91dyTtRctRmnW4Ip5Kg_zOu4PkEO';
 const { createClient } = supabase;
 const db = createClient(supabaseUrl, supabaseKey);
 
-const sampleQuestion = {
-  id: 1,
-  question_text: '小明买了3支笔，每支4元，一共多少钱？',
-  llm_answer: '我认为答案是A，因为 3 × 4 = 12。',
-  source_text: '补充资料：3 × 4 = 12，所以正确答案是 A。',
-  correct_answer: 'A',
-  time_limit: 20
-};
+const questions = [
+  {
+    id: 1,
+    question_text: '小明买了3支笔，每支4元，一共多少钱？',
+    llm_answer: '这题选 A。3 支笔，每支 4 元，总价就是 3 × 4 = 12 元，所以 A 更合理。',
+    source_text: '补充资料：3 × 4 = 12，所以正确答案是 A。',
+    option_a: '12元',
+    option_b: '10元',
+    correct_answer: 'A',
+    time_limit: 20
+  },
+  {
+    id: 2,
+    question_text: '一件商品原价80元，打75折后价格是多少？',
+    llm_answer: '我倾向于选 B，因为 80 × 0.75 看起来像 70。',
+    source_text: '补充资料：80 × 0.75 = 60，所以正确答案是 A。',
+    option_a: '60元',
+    option_b: '70元',
+    correct_answer: 'A',
+    time_limit: 20
+  }
+];
+
+let currentQuestion = questions[0];
 
 let timerId = null;
 let timeLeft = 0;
@@ -23,8 +39,8 @@ let sourceTimeMs = 0;
 let hasSubmitted = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderQuestion(sampleQuestion);
-  bindEvents(sampleQuestion);
+  renderQuestion(currentQuestion);
+  bindEvents(currentQuestion);
 });
 
 function renderQuestion(q) {
@@ -32,6 +48,8 @@ function renderQuestion(q) {
   document.getElementById('ai-answer-text').textContent = q.llm_answer;
   document.getElementById('source-box').textContent = q.source_text;
   document.getElementById('status').textContent = '';
+  document.getElementById('optionA').textContent = q.option_a;
+  document.getElementById('optionB').textContent = q.option_b;
 
   pageStartTime = Date.now();
   startTimer(q.time_limit);
@@ -78,7 +96,7 @@ function startTimer(seconds) {
 
     if (timeLeft <= 0) {
       clearInterval(timerId);
-      await submitAnswer('timeout', sampleQuestion);
+      await submitAnswer('timeout', currentQuestion);
     }
   }, 1000);
 }
