@@ -41,7 +41,7 @@ let hasSubmitted = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   renderQuestion(currentQuestion);
-  bindEvents(currentQuestion);
+  bindEvents();
 });
 
 function resetQuestionState() {
@@ -75,33 +75,35 @@ function renderQuestion(q) {
   startTimer(q.time_limit);
 }
 
-function bindEvents(q) {
-  document.getElementById('source-btn').addEventListener('click', () => {
-    if (hasSubmitted) return;
-
-    const box = document.getElementById('source-box');
-    const isHidden = box.style.display === 'none';
-
-    if (isHidden) {
-      box.style.display = 'block';
-      clickedSource = true;
-      sourceOpenedAt = Date.now();
-    } else {
-      box.style.display = 'none';
-      if (sourceOpenedAt) {
-        sourceTimeMs += Date.now() - sourceOpenedAt;
-        sourceOpenedAt = null;
-      }
-    }
-  });
+function bindEvents() {
+  document.getElementById('source-btn').addEventListener('click', toggleSource);
 
   document.getElementById('btnA').addEventListener('click', async () => {
-    await submitAnswer('A', q);
+    await submitAnswer('A');
   });
 
   document.getElementById('btnB').addEventListener('click', async () => {
-    await submitAnswer('B', q);
+    await submitAnswer('B');
   });
+}
+
+function toggleSource() {
+  if (hasSubmitted) return;
+
+  const box = document.getElementById('source-box');
+  const isHidden = box.style.display === 'none';
+
+  if (isHidden) {
+    box.style.display = 'block';
+    clickedSource = true;
+    sourceOpenedAt = Date.now();
+  } else {
+    box.style.display = 'none';
+    if (sourceOpenedAt) {
+      sourceTimeMs += Date.now() - sourceOpenedAt;
+      sourceOpenedAt = null;
+    }
+  }
 }
 
 function startTimer(seconds) {
@@ -116,12 +118,12 @@ function startTimer(seconds) {
 
     if (timeLeft <= 0) {
       clearInterval(timerId);
-      await submitAnswer('timeout', currentQuestion);
+      await submitAnswer('timeout');
     }
   }, 1000);
 }
 
-async function submitAnswer(answer, q) {
+async function submitAnswer(answer) {
   if (hasSubmitted) return;
   hasSubmitted = true;
 
@@ -133,15 +135,15 @@ async function submitAnswer(answer, q) {
   }
 
   const pageTimeMs = Date.now() - pageStartTime;
-  const correct = answer === q.correct_answer;
+  const correct = answer === currentQuestion.correct_answer;
 
   const payload = {
     participant_id: 'test_user_001',
     condition_time: 'high',
     condition_confidence: 'high',
-    question_id: q.id,
-    question_text: q.question_text,
-    llm_answer: q.llm_answer,
+    question_id: currentQuestion.id,
+    question_text: currentQuestion.question_text,
+    llm_answer: currentQuestion.llm_answer,
     clicked_source: clickedSource,
     source_time_ms: sourceTimeMs,
     answer: answer,
@@ -167,19 +169,18 @@ async function submitAnswer(answer, q) {
   console.log('保存成功');
 
   if (answer === 'timeout') {
-  document.getElementById('status').textContent = '时间到，系统已自动保存';
-} else {
-  document.getElementById('status').textContent = `已保存你的答案：${answer}`;
-}
+    document.getElementById('status').textContent = '时间到，系统已自动保存';
+  } else {
+    document.getElementById('status').textContent = `已保存你的答案：${answer}`;
+  }
 
-if (currentIndex < questions.length - 1) {
-  setTimeout(() => {
-    currentIndex += 1;
-    renderQuestion(questions[currentIndex]);
-  }, 1000);
-} else {
-  document.getElementById('status').textContent = '实验完成，所有题目已保存';
-  document.getElementById('timer').textContent = '0';
-}
-
+  if (currentIndex < questions.length - 1) {
+    setTimeout(() => {
+      currentIndex += 1;
+      renderQuestion(questions[currentIndex]);
+    }, 1000);
+  } else {
+    document.getElementById('status').textContent = '实验完成，所有题目已保存';
+    document.getElementById('timer').textContent = '0';
+  }
 }
