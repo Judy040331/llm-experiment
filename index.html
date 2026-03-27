@@ -4,181 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>实验测试</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
-    .box {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 16px;
-      margin: 16px 0;
-    }
-    button {
-      margin-right: 8px;
-      padding: 10px 16px;
-      cursor: pointer;
-    }
-    #timer {
-      color: red;
-      font-weight: bold;
-    }
-    #sourceModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.4);
-    }
-    #sourceContent {
-      background: #fff;
-      width: 70%;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="./script.js" defer></script>
 </head>
 <body>
-  <h1>实验测试</h1>
-  <p>剩余时间：<span id="timer">--</span> 秒</p>
+  <div class="container">
+    <h1>实验测试</h1>
 
-  <div class="box">
-    <h3 id="question"></h3>
-  </div>
+    <p>剩余时间：<span id="timer">--</span> 秒</p>
 
-  <div class="box">
-    <strong>AI 回答：</strong>
-    <p id="llmAnswer"></p>
-    <button id="sourceBtn">查看补充资料</button>
-  </div>
-
-  <div class="box">
-    <strong>你的答案：</strong><br><br>
-    <button onclick="submitAnswer('A')">A</button>
-    <button onclick="submitAnswer('B')">B</button>
-  </div>
-
-  <div id="sourceModal">
-    <div id="sourceContent">
-      <h3>补充资料</h3>
-      <p id="sourceText"></p>
-      <button onclick="closeSource()">关闭</button>
+    <div class="card">
+      <h2>题目</h2>
+      <div id="question"></div>
     </div>
+
+    <div class="card">
+      <h2>AI 回答</h2>
+      <div id="ai-answer-text"></div>
+      <br />
+      <button>查看补充资料</button>
+    </div>
+
+    <div class="card">
+      <h2>你的答案</h2>
+      <button id="btnA">A</button>
+      <button id="btnB">B</button>
+    </div>
+
+    <div id="status"></div>
   </div>
-
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-    const supabaseUrl = "你的 Project URL";
-    const supabaseKey = "你的 Publishable key";
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const experiment = {
-      participant_id: "P" + Math.random().toString(36).slice(2, 8),
-      condition_time: Math.random() < 0.5 ? "high" : "low",
-      condition_confidence: Math.random() < 0.5 ? "high" : "low",
-      start_time: null,
-      source_open_time: null,
-      source_time_ms: 0,
-      clicked_source: false,
-      answered: false
-    };
-
-    const questionData = {
-      question_id: 4,
-      question_text: "大猩猩每平方英寸的毛发数量是人类的两倍吗？",
-      correct_answer: "B",
-      llm_high: "是。大猩猩的毛发密度明显高于人类，大约可达到两倍，因此答案应为“是”。",
-      llm_low: "我倾向于认为是。大猩猩的毛发密度可能高于人类，较可能接近两倍，所以答案大概是“是”。",
-      source_text: "补充资料：比较研究指出，人类并不是因为毛囊特别少而显得少毛，更多原因在于体毛更细、更短、更浅。"
-    };
-
-    let totalTimeLimit = experiment.condition_time === "high" ? 12 : 26;
-    let timeLeft = totalTimeLimit;
-    let timerInterval = null;
-
-    function initPage() {
-      document.getElementById("question").innerText = questionData.question_text;
-      document.getElementById("llmAnswer").innerText =
-        experiment.condition_confidence === "high" ? questionData.llm_high : questionData.llm_low;
-      document.getElementById("sourceText").innerText = questionData.source_text;
-
-      experiment.start_time = Date.now();
-
-      document.getElementById("sourceBtn").addEventListener("click", openSource);
-
-      document.getElementById("timer").innerText = timeLeft;
-      timerInterval = setInterval(() => {
-        timeLeft -= 1;
-        document.getElementById("timer").innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          if (!experiment.answered) {
-            submitAnswer("TIMEOUT");
-          }
-        }
-      }, 1000);
-    }
-
-    function openSource() {
-      experiment.clicked_source = true;
-      experiment.source_open_time = Date.now();
-      document.getElementById("sourceModal").style.display = "block";
-    }
-
-    window.closeSource = function() {
-      document.getElementById("sourceModal").style.display = "none";
-      if (experiment.source_open_time) {
-        experiment.source_time_ms += Date.now() - experiment.source_open_time;
-        experiment.source_open_time = null;
-      }
-    }
-
-    window.submitAnswer = async function(answer) {
-      if (experiment.answered) return;
-      experiment.answered = true;
-
-      if (experiment.source_open_time) {
-        experiment.source_time_ms += Date.now() - experiment.source_open_time;
-        experiment.source_open_time = null;
-      }
-
-      clearInterval(timerInterval);
-
-      const page_time_ms = Date.now() - experiment.start_time;
-      const correct = answer === questionData.correct_answer;
-
-      const payload = {
-        participant_id: experiment.participant_id,
-        condition_time: experiment.condition_time,
-        condition_confidence: experiment.condition_confidence,
-        question_id: questionData.question_id,
-        question_text: questionData.question_text,
-        llm_answer: document.getElementById("llmAnswer").innerText,
-        clicked_source: experiment.clicked_source,
-        source_time_ms: experiment.source_time_ms,
-        answer: answer,
-        correct: correct,
-        page_time_ms: page_time_ms
-      };
-
-      const { error } = await supabase
-        .from("responses")
-        .insert([payload]);
-
-      if (error) {
-        console.error(error);
-        document.body.innerHTML = "<h2>提交失败</h2><p>请打开浏览器控制台查看报错。</p>";
-      } else {
-        document.body.innerHTML = "<h2>提交成功</h2><p>数据已经写入数据库。</p>";
-      }
-    }
-
-    initPage();
-  </script>
 </body>
 </html>
