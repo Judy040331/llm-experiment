@@ -10,38 +10,112 @@
 </head>
 <body>
   <div class="container">
-    <h1>实验测试</h1>
 
-    <p>剩余时间：<span id="timer">--</span> 秒</p>
+    <!-- 题目作答页 -->
+    <div id="experiment-screen">
+      <h1>实验测试</h1>
 
-    <div class="card">
-      <h2>题目</h2>
-      <div id="question"></div>
-    </div>
+      <p>剩余时间：<span id="timer">--</span> 秒</p>
 
-    <div class="card">
-      <h2>AI 回答</h2>
-      <div id="ai-answer-text"></div>
-      <br />
-      <button id="source-btn">查看补充资料</button>
-      <div id="source-box" style="display: none; margin-top: 16px;"></div>
-    </div>
-
-    <div class="card">
-      <h2>你的答案</h2>
-
-      <div class="option-row">
-        <button id="btnA">A</button>
-        <span id="optionA" class="option-text"></span>
+      <div class="card">
+        <h2>题目</h2>
+        <div id="question"></div>
       </div>
 
-      <div class="option-row">
-        <button id="btnB">B</button>
-        <span id="optionB" class="option-text"></span>
+      <div class="card">
+        <h2>AI 回答</h2>
+        <div id="ai-answer-text"></div>
+        <br />
+        <button id="source-btn">查看补充资料</button>
+        <div id="source-box" style="display: none; margin-top: 16px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>你的答案</h2>
+
+        <div class="option-row">
+          <button id="btnA">A</button>
+          <span id="optionA" class="option-text"></span>
+        </div>
+
+        <div class="option-row">
+          <button id="btnB">B</button>
+          <span id="optionB" class="option-text"></span>
+        </div>
+      </div>
+
+      <div id="status"></div>
+    </div>
+
+    <!-- 操控检验页 -->
+    <div id="check-screen" style="display: none; margin-top: 32px;">
+      <div class="card">
+        <h2>问卷反馈</h2>
+        <p>请根据刚才整组题目的作答体验进行评价。</p>
+
+        <div style="margin-top: 24px;">
+          <p>1. 刚才作答时，我感到时间很紧。</p>
+          <label><input type="radio" name="time-pressure" value="1"> 1</label>
+          <label><input type="radio" name="time-pressure" value="2"> 2</label>
+          <label><input type="radio" name="time-pressure" value="3"> 3</label>
+          <label><input type="radio" name="time-pressure" value="4"> 4</label>
+          <label><input type="radio" name="time-pressure" value="5"> 5</label>
+          <label><input type="radio" name="time-pressure" value="6"> 6</label>
+          <label><input type="radio" name="time-pressure" value="7"> 7</label>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <p>2. 刚才作答时，我觉得自己是在被催着做决定。</p>
+          <label><input type="radio" name="time-pressure-2" value="1"> 1</label>
+          <label><input type="radio" name="time-pressure-2" value="2"> 2</label>
+          <label><input type="radio" name="time-pressure-2" value="3"> 3</label>
+          <label><input type="radio" name="time-pressure-2" value="4"> 4</label>
+          <label><input type="radio" name="time-pressure-2" value="5"> 5</label>
+          <label><input type="radio" name="time-pressure-2" value="6"> 6</label>
+          <label><input type="radio" name="time-pressure-2" value="7"> 7</label>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <p>3. 刚才这个 LLM 回答看起来很有把握。</p>
+          <label><input type="radio" name="llm-confidence" value="1"> 1</label>
+          <label><input type="radio" name="llm-confidence" value="2"> 2</label>
+          <label><input type="radio" name="llm-confidence" value="3"> 3</label>
+          <label><input type="radio" name="llm-confidence" value="4"> 4</label>
+          <label><input type="radio" name="llm-confidence" value="5"> 5</label>
+          <label><input type="radio" name="llm-confidence" value="6"> 6</label>
+          <label><input type="radio" name="llm-confidence" value="7"> 7</label>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <p>4. 刚才这个 LLM 回答看起来可信。</p>
+          <label><input type="radio" name="llm-credible" value="1"> 1</label>
+          <label><input type="radio" name="llm-credible" value="2"> 2</label>
+          <label><input type="radio" name="llm-credible" value="3"> 3</label>
+          <label><input type="radio" name="llm-credible" value="4"> 4</label>
+          <label><input type="radio" name="llm-credible" value="5"> 5</label>
+          <label><input type="radio" name="llm-credible" value="6"> 6</label>
+          <label><input type="radio" name="llm-credible" value="7"> 7</label>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <p>5. 刚才这个 LLM 回答看起来可靠。</p>
+          <label><input type="radio" name="llm-reliable" value="1"> 1</label>
+          <label><input type="radio" name="llm-reliable" value="2"> 2</label>
+          <label><input type="radio" name="llm-reliable" value="3"> 3</label>
+          <label><input type="radio" name="llm-reliable" value="4"> 4</label>
+          <label><input type="radio" name="llm-reliable" value="5"> 5</label>
+          <label><input type="radio" name="llm-reliable" value="6"> 6</label>
+          <label><input type="radio" name="llm-reliable" value="7"> 7</label>
+        </div>
+
+        <div style="margin-top: 32px;">
+          <button id="submit-check">提交反馈</button>
+        </div>
+
+        <div id="check-status" style="margin-top: 20px;"></div>
       </div>
     </div>
 
-    <div id="status"></div>
   </div>
 </body>
 </html>
