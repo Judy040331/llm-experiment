@@ -225,13 +225,16 @@ async function submitCheck() {
   document.getElementById('submit-check').disabled = true;
   document.getElementById('check-status').textContent = '正在保存反馈...';
 
-  const { error } = await db
+  const { data, error } = await db
     .from('responses')
     .update({
       time_pressure_rating: timePressureAvg,
       llm_credibility_rating: llmCredibilityAvg
     })
-    .eq('run_id', runId);
+    .eq('run_id', runId)
+    .select();
+
+console.log('更新结果:', data);
 
   if (error) {
     console.error('反馈保存失败:', error);
