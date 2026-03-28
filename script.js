@@ -30,16 +30,21 @@ let currentIndex = 0;
 let currentQuestion = questions[currentIndex];
 
 let timerId = null;
-let timeLeft = 0;
 let pageStartTime = 0;
 
 let clickedSource = false;
 let sourceOpenedAt = null;
 let sourceTimeMs = 0;
-
 let hasSubmitted = false;
 
 const participantId = getParticipantId();
+const runId = getRunId();
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderQuestion(currentQuestion);
+  bindQuestionEvents();
+  bindCheckEvents();
+});
 
 function getParticipantId() {
   let existing = sessionStorage.getItem('participant_id');
@@ -50,10 +55,9 @@ function getParticipantId() {
   return newId;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderQuestion(currentQuestion);
-  bindEvents();
-});
+function getRunId() {
+  return 'run_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+}
 
 function resetQuestionState() {
   clearInterval(timerId);
@@ -86,7 +90,7 @@ function renderQuestion(q) {
   startTimer(q.time_limit);
 }
 
-function bindEvents() {
+function bindQuestionEvents() {
   document.getElementById('source-btn').addEventListener('click', toggleSource);
 
   document.getElementById('btnA').addEventListener('click', async () => {
@@ -95,6 +99,12 @@ function bindEvents() {
 
   document.getElementById('btnB').addEventListener('click', async () => {
     await submitAnswer('B');
+  });
+}
+
+function bindCheckEvents() {
+  document.getElementById('submit-check').addEventListener('click', async () => {
+    await submitCheck();
   });
 }
 
@@ -120,7 +130,7 @@ function toggleSource() {
 function startTimer(seconds) {
   clearInterval(timerId);
 
-  timeLeft = seconds;
+  let timeLeft = seconds;
   document.getElementById('timer').textContent = timeLeft;
 
   timerId = setInterval(async () => {
@@ -149,6 +159,7 @@ async function submitAnswer(answer) {
   const correct = answer === currentQuestion.correct_answer;
 
   const payload = {
+    run_id: runId,
     participant_id: participantId,
     condition_time: 'high',
     condition_confidence: 'high',
@@ -159,10 +170,10 @@ async function submitAnswer(answer) {
     source_time_ms: sourceTimeMs,
     answer: answer,
     correct: correct,
-    page_time_ms: pageTimeMs
+    page_time_ms: pageTimeMs,
+    time_pressure_rating: null,
+    llm_credibility_rating: null
   };
-
-  console.log('准备写入数据库:', payload);
 
   document.getElementById('btnA').disabled = true;
   document.getElementById('btnB').disabled = true;
@@ -177,21 +188,57 @@ async function submitAnswer(answer) {
     return;
   }
 
-  console.log('保存成功');
-
-  if (answer === 'timeout') {
-    document.getElementById('status').textContent = '时间到，系统已自动保存';
-  } else {
-    document.getElementById('status').textContent = `已保存你的答案：${answer}`;
-  }
-
   if (currentIndex < questions.length - 1) {
+    document.getElementById('status').textContent = '本题已保存，正在进入下一题...';
+
     setTimeout(() => {
       currentIndex += 1;
       renderQuestion(questions[currentIndex]);
     }, 1000);
   } else {
-    document.getElementById('status').textContent = '实验完成，所有题目已保存';
-    document.getElementById('timer').textContent = '0';
+    showCheckScreen();
   }
+}
+
+function showCheckScreen() {
+  clearInterval(timerId);
+  document.getElementById('timer').textContent = '0';
+  document.getElementById('experiment-screen').style.display = 'none';
+  document.getElementById('check-screen').style.display = 'block';
+}
+
+async function submitCheck() {
+  const tp1 = document.querySelector('input[name="time-pressure"]:checked')?.value;
+  const tp2 = document.querySelector('input[name="time-pressure-2"]:checked')?.value;
+  const lc1 = document.querySelector('input[name="llm-confidence"]:checked')?.value;
+  const lc2 = document.querySelector('input[name="llm-credible"]:checked')?.value;
+  const lc3 = document.querySelector('input[name="llm-reliable"]:checked')?.value;
+
+  if (!tp1 || !tp2 || !lc1 || !lc2 || !lc3) {
+    document.getElementById('check-status').textContent = '请完成所有评分后再提交';
+    return;
+  }
+
+  const timePressureAvg = (Number(tp1) + Number(tp2)) / 2;
+  const llmCredibilityAvg = (Number(lc1) + Number(lc2) + Number(lc3)) / 3;
+
+  document.getElementById('submit-check').disabled = true;
+  document.getElementById('check-status').textContent = '正在保存反馈...';
+
+  const { error } = await db
+    .from('responses')
+    .update({
+      time_pressure_rating: timePressureAvg,
+      llm_credibility_rating: llmCredibilityAvg
+    })
+    .eq('run_id', runId);
+
+  if (error) {
+    console.error('反馈保存失败:', error);
+    document.getElementById('submit-check').disabled = false;
+    document.getElementById('check-status').textContent = '反馈保存失败，请查看控制台';
+    return;
+  }
+
+  document.getElementById('check-status').textContent = '反馈已提交，实验完成';
 }
