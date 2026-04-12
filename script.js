@@ -88,11 +88,22 @@ let conditionTime = null;
 let conditionConfidence = null;
 let currentShownAnswer = '';
 
+//document.addEventListener('DOMContentLoaded', async () => {
+//  document.getElementById('total-count').textContent = questions.length;
+//  bindQuestionEvents();
+//  bindCheckEvents();
+//  await initializeExperiment();
+//});
 document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('total-count').textContent = questions.length;
   bindQuestionEvents();
   bindCheckEvents();
-  await initializeExperiment();
+
+  conditionTime = 'high';
+  conditionConfidence = 'high';
+  console.log('测试模式条件:', conditionTime, conditionConfidence);
+
+  renderQuestion(currentQuestion);
 });
 
 function getParticipantId() {
