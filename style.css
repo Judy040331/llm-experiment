@@ -3,53 +3,150 @@ body {
   background: #f6f7f9;
   margin: 0;
   padding: 40px;
+  color: #222;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   background: #ffffff;
   padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 h1 {
   margin-top: 0;
-  font-size: 48px;
+  font-size: 42px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .card {
   border: 1px solid #dcdcdc;
   border-radius: 12px;
   padding: 24px;
-  margin-top: 24px;
-  min-height: 80px;
+  margin-top: 20px;
+  background: #fff;
+}
+
+.action-card {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 button {
-  padding: 12px 24px;
-  font-size: 28px;
-  margin-right: 16px;
+  padding: 12px 22px;
+  font-size: 20px;
   cursor: pointer;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background: #fff;
 }
 
-#timer {
-  color: red;
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#timer,
+#modal-timer {
+  color: #d40000;
   font-weight: bold;
 }
 
-#status {
-  margin-top: 24px;
-  font-size: 24px;
+#status,
+#check-status {
+  margin-top: 22px;
+  font-size: 20px;
 }
 
 .option-row {
   display: flex;
   align-items: center;
-  margin-top: 20px;
+  gap: 16px;
+  margin-top: 18px;
 }
 
 .option-text {
-  font-size: 28px;
+  font-size: 24px;
+  line-height: 1.5;
+}
+
+.rating-block {
+  margin-top: 22px;
+  line-height: 2;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-card {
+  width: min(760px, 88vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 26px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  border: 1px solid #ddd;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-body {
+  line-height: 1.8;
+  font-size: 18px;
+  white-space: pre-wrap;
+}
+
+.source-label {
+  margin-top: 18px;
+  font-weight: bold;
+}
+
+.modal-actions {
+  margin-top: 24px;
+}
+
+.blur-lock {
+  pointer-events: none;
+  user-select: none;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
