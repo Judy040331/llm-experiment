@@ -34,10 +34,10 @@
         </label>
 
         <div style="margin-top:24px;">
-          <button id="start-experiment-btn">开始实验</button>
+          <button type="button" id="start-experiment-btn">开始实验</button>
         </div>
 
-        <div id="intro-status" style="margin-top:18px;"></div>
+        <div id="intro-status" style="margin-top:18px;" aria-live="polite"></div>
       </div>
     </div>
 
@@ -63,8 +63,8 @@
         </div>
 
         <div class="card action-card">
-          <button id="source-btn">查看补充资料</button>
-          <button id="go-answer-btn">进入作答</button>
+          <button type="button" id="source-btn">查看补充资料</button>
+          <button type="button" id="go-answer-btn">进入作答</button>
         </div>
       </div>
 
@@ -73,12 +73,12 @@
           <h2>你的答案</h2>
 
           <div class="option-row">
-            <button id="btnA">A</button>
+            <button type="button" id="btnA">A</button>
             <span id="optionA" class="option-text"></span>
           </div>
 
           <div class="option-row">
-            <button id="btnB">B</button>
+            <button type="button" id="btnB">B</button>
             <span id="optionB" class="option-text"></span>
           </div>
         </div>
@@ -97,7 +97,7 @@
           <p id="source-label" class="source-label"></p>
 
           <div class="modal-actions">
-            <button id="close-source-modal-btn">关闭并作答</button>
+            <button type="button" id="close-source-modal-btn">关闭并作答</button>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@
         </div>
 
         <div style="margin-top: 28px;">
-          <button id="submit-check">提交反馈</button>
+          <button type="button" id="submit-check">提交反馈</button>
         </div>
 
         <div id="check-status" style="margin-top: 20px;"></div>
