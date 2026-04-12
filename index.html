@@ -10,7 +10,39 @@
 </head>
 <body>
   <div class="container">
-    <div id="experiment-screen">
+
+    <!-- 进入实验前的说明页 -->
+    <div id="intro-screen">
+      <h1>实验说明</h1>
+
+      <div class="card">
+        <p>欢迎参与本实验。</p>
+        <p>本实验旨在研究人在阅读 AI 回答后的判断与信息核查行为。实验过程中，你将看到若干题目、AI 回答以及可选的补充资料，并在有限时间内完成判断。</p>
+        <p>请根据你的真实想法作答，不必刻意追求“标准答案”。</p>
+      </div>
+
+      <div class="card">
+        <h2>安全声明</h2>
+        <p>本实验不涉及身体风险，不收集敏感身份信息。你在实验中的作答、点击行为与停留时长仅用于学术研究分析。</p>
+        <p>如你同意继续，请点击下方“开始实验”。</p>
+      </div>
+
+      <div class="card">
+        <label style="display:flex; align-items:center; gap:10px; font-size:18px;">
+          <input type="checkbox" id="consent-checkbox" />
+          我已阅读上述说明，并同意参加本实验
+        </label>
+
+        <div style="margin-top:24px;">
+          <button id="start-experiment-btn">开始实验</button>
+        </div>
+
+        <div id="intro-status" style="margin-top:18px;"></div>
+      </div>
+    </div>
+
+    <!-- 原有实验页，初始隐藏 -->
+    <div id="experiment-screen" style="display: none;">
       <h1>实验测试</h1>
 
       <div class="top-bar">
@@ -26,7 +58,7 @@
 
         <div class="card">
           <h2>AI 回答</h2>
-          <div id="ai-thinking" class="thinking-text" style="display: none;">正在思考...</div>
+          <div id="ai-thinking" class="thinking-text" style="display: none;">AI 正在思考...</div>
           <div id="ai-answer-text"></div>
         </div>
 
@@ -71,6 +103,7 @@
       </div>
     </div>
 
+    <!-- 操控检验页，初始隐藏 -->
     <div id="check-screen" style="display: none; margin-top: 32px;">
       <div class="card">
         <h2>问卷反馈</h2>
@@ -138,6 +171,7 @@
         <div id="check-status" style="margin-top: 20px;"></div>
       </div>
     </div>
+
   </div>
 </body>
 </html>
