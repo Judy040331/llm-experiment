@@ -3,6 +3,19 @@ const supabaseKey = 'sb_publishable_xSr91dyTtRctRmnW4Ip5Kg_zOu4PkEO';
 const { createClient } = supabase;
 const db = createClient(supabaseUrl, supabaseKey);
 
+/*
+  测试模式说明：
+  true  = 不消耗块随机序列，固定使用下面两项条件
+  false = 正式模式，从 Supabase 的 claim_next_assignment() 领取条件
+*/
+const USE_TEST_MODE = true;
+const TEST_CONDITION_TIME = 'high';        // 'high' 或 'low'
+const TEST_CONDITION_CONFIDENCE = 'high';  // 'high' 或 'low'
+
+// AI展示效果参数：正式实验时建议固定，不要随条件变化
+const AI_THINKING_DELAY_MS = 1200;
+const AI_TYPING_SPEED_MS = 18;
+
 const questions = [
   {
     id: 1,
@@ -58,7 +71,7 @@ const questions = [
     source_text:
       '皇家港是牙买加的重要水下遗址，但这并不意味着该地点完全不能潜水。潜水资料显示，前往皇家港潜水通常需要获得当地主管部门的特别许可，并通过合规潜水运营方安排。换句话说，这里不是对普通游客完全开放的常规潜点，但在受许可和受监管的条件下，并非绝对无法进行水肺潜水。',
     source_label: '来源：公开资料整理',
-    option_a: '可以',
+    option_a: '可以（在取得许可/通过合规潜店情况下）',
     option_b: '不可以',
     correct_answer: 'A',
     time_limit_high: 10,
@@ -80,6 +93,7 @@ let clickedSource = false;
 let sourceOpenedAt = null;
 let sourceTimeMs = 0;
 let hasSubmitted = false;
+let isTyping = false;
 
 const participantId = getParticipantId();
 const runId = getRunId();
@@ -92,7 +106,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('total-count').textContent = questions.length;
   bindQuestionEvents();
   bindCheckEvents();
-  await initializeExperiment();
+
+  if (USE_TEST_MODE) {
+    conditionTime = TEST_CONDITION_TIME;
+    conditionConfidence = TEST_CONDITION_CONFIDENCE;
+    console.log('测试模式条件:', conditionTime, conditionConfidence);
+    renderQuestion(currentQuestion);
+  } else {
+    await initializeExperiment();
+  }
 });
 
 function getParticipantId() {
@@ -141,17 +163,20 @@ function resetQuestionState() {
   sourceOpenedAt = null;
   sourceTimeMs = 0;
   hasSubmitted = false;
+  isTyping = false;
 
   document.getElementById('status').textContent = '';
   document.getElementById('answer-screen').style.display = 'none';
   document.getElementById('source-modal-overlay').style.display = 'none';
+  document.getElementById('ai-thinking').style.display = 'none';
+  document.getElementById('ai-answer-text').textContent = '';
 
   document.body.classList.remove('modal-open');
   document.getElementById('question-screen').classList.remove('blur-lock');
   document.getElementById('answer-screen').classList.remove('blur-lock');
 
-  document.getElementById('source-btn').disabled = false;
-  document.getElementById('go-answer-btn').disabled = false;
+  document.getElementById('source-btn').disabled = true;
+  document.getElementById('go-answer-btn').disabled = true;
   document.getElementById('close-source-modal-btn').disabled = false;
   document.getElementById('btnA').disabled = false;
   document.getElementById('btnB').disabled = false;
@@ -169,23 +194,46 @@ function renderQuestion(q) {
 
   document.getElementById('progress').textContent = currentIndex + 1;
   document.getElementById('question').textContent = q.question_text;
-  document.getElementById('ai-answer-text').textContent = currentShownAnswer;
-
   document.getElementById('source-text').textContent = q.source_text;
   document.getElementById('source-label').textContent = q.source_label;
-
   document.getElementById('optionA').textContent = q.option_a;
   document.getElementById('optionB').textContent = q.option_b;
 
   pageStartTime = Date.now();
   startTimer(timeLimit);
+  showAIAnswerWithEffect(currentShownAnswer);
+}
+
+async function showAIAnswerWithEffect(text) {
+  const thinkingEl = document.getElementById('ai-thinking');
+  const answerEl = document.getElementById('ai-answer-text');
+
+  isTyping = true;
+  thinkingEl.style.display = 'block';
+  answerEl.textContent = '';
+
+  await sleep(AI_THINKING_DELAY_MS);
+
+  if (hasSubmitted) return;
+
+  thinkingEl.style.display = 'none';
+
+  for (let i = 0; i < text.length; i++) {
+    if (hasSubmitted) return;
+    answerEl.textContent += text[i];
+    await sleep(AI_TYPING_SPEED_MS);
+  }
+
+  isTyping = false;
+  document.getElementById('source-btn').disabled = false;
+  document.getElementById('go-answer-btn').disabled = false;
 }
 
 function bindQuestionEvents() {
   document.getElementById('source-btn').addEventListener('click', openSourceModal);
 
   document.getElementById('go-answer-btn').addEventListener('click', () => {
-    if (hasSubmitted) return;
+    if (hasSubmitted || isTyping) return;
     document.getElementById('answer-screen').style.display = 'block';
   });
 
@@ -209,7 +257,7 @@ function bindCheckEvents() {
 }
 
 function openSourceModal() {
-  if (hasSubmitted) return;
+  if (hasSubmitted || isTyping) return;
 
   clickedSource = true;
   sourceOpenedAt = Date.now();
@@ -221,7 +269,7 @@ function openSourceModal() {
 }
 
 function closeSourceModalAndGoAnswer() {
-  if (hasSubmitted) return;
+  if (hasSubmitted || isTyping) return;
 
   if (sourceOpenedAt) {
     sourceTimeMs += Date.now() - sourceOpenedAt;
@@ -267,6 +315,7 @@ function disableQuestionFlow() {
 async function submitAnswer(answer) {
   if (hasSubmitted) return;
   hasSubmitted = true;
+  isTyping = false;
 
   clearInterval(timerId);
 
@@ -369,4 +418,8 @@ async function submitCheck() {
   }
 
   document.getElementById('check-status').textContent = '反馈已提交，实验完成';
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
