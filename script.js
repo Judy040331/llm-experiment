@@ -94,6 +94,7 @@ let sourceOpenedAt = null;
 let sourceTimeMs = 0;
 let hasSubmitted = false;
 let isTyping = false;
+let hasExperimentStarted = false;
 
 const participantId = getParticipantId();
 const runId = getRunId();
@@ -110,17 +111,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function bindIntroEvents() {
-  document.getElementById('start-experiment-btn').addEventListener('click', async () => {
-    const consentChecked = document.getElementById('consent-checkbox').checked;
+  const startBtn = document.getElementById('start-experiment-btn');
+  const consentBox = document.getElementById('consent-checkbox');
+  const introStatus = document.getElementById('intro-status');
+  const introScreen = document.getElementById('intro-screen');
+  const experimentScreen = document.getElementById('experiment-screen');
 
-    if (!consentChecked) {
-      document.getElementById('intro-status').textContent = '请先勾选同意参加实验后再开始';
+  if (!startBtn || !consentBox || !introStatus || !introScreen || !experimentScreen) {
+    console.error('说明页相关元素缺失，请检查 index.html 的 id 是否一致');
+    return;
+  }
+
+  startBtn.addEventListener('click', async () => {
+    if (hasExperimentStarted) return;
+
+    if (!consentBox.checked) {
+      introStatus.textContent = '请先勾选同意参加实验后再开始';
       return;
     }
 
-    document.getElementById('intro-status').textContent = '';
-    document.getElementById('intro-screen').style.display = 'none';
-    document.getElementById('experiment-screen').style.display = 'block';
+    hasExperimentStarted = true;
+    startBtn.disabled = true;
+    introStatus.textContent = '';
+
+    introScreen.style.display = 'none';
+    experimentScreen.style.display = 'block';
 
     if (USE_TEST_MODE) {
       conditionTime = TEST_CONDITION_TIME;
