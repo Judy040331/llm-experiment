@@ -90,6 +90,12 @@ button:disabled {
   line-height: 2;
 }
 
+.thinking-text {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
