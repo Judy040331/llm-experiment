@@ -8,7 +8,7 @@ const db = createClient(supabaseUrl, supabaseKey);
   true  = 不消耗块随机序列，固定使用下面两项条件
   false = 正式模式，从 Supabase 的 claim_next_assignment() 领取条件
 */
-const USE_TEST_MODE = false;
+const USE_TEST_MODE = true;
 const TEST_CONDITION_TIME = 'high';        // 'high' 或 'low'
 const TEST_CONDITION_CONFIDENCE = 'high';  // 'high' 或 'low'
 
