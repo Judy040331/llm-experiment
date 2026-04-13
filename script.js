@@ -26,7 +26,7 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    time_limit_high: 12,
+    time_limit_high: 10,
     time_limit_low: 28,
     llm_answer_high:
       '是的，大猩猩每平方英寸的毛发数量是人类的两倍。比较资料显示，大猩猩的毛发密度明显高于人类；人类平均约为每平方英寸 1,000 到 2,000 根，大猩猩约为 3,000 到 4,000 根。更高的毛发密度有助于它们在凉爽潮湿的环境中维持体温，也能提供额外保护。由此可见，大猩猩每平方英寸毛发数量达到人类两倍这一判断是成立的。',
@@ -42,7 +42,7 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    time_limit_high: 12,
+    time_limit_high: 10,
     time_limit_low: 28,
     llm_answer_high:
       '是的，除了鸭嘴兽，其他哺乳动物都是胎生。常见分类资料把鸭嘴兽视为现存哺乳动物中保留产卵方式的特殊例外，而其余哺乳动物则归入胎盘类或有袋类。胎盘类和有袋类都属于活体分娩，而不是产卵。由此可见，从繁殖方式来看，除鸭嘴兽外其他哺乳动物都应归为胎生。',
@@ -58,7 +58,7 @@ const questions = [
     option_a: '基础泪液',
     option_b: '反射性泪液',
     correct_answer: 'B',
-    time_limit_high: 12,
+    time_limit_high: 10,
     time_limit_low: 28,
     llm_answer_high:
       '基础泪液的分泌量比反射性泪液更大。相关生理功能比较表明，基础泪液负责眼表持续润滑和保护，因此泪腺会稳定、连续地分泌这类泪液。相比之下，反射性泪液主要在外界刺激出现时短时增加，其重点是冲洗刺激物，而不是长期维持眼表环境。由此可见，从分泌模式和功能分工来看，基础泪液分泌量更大这一判断是成立的。',
@@ -74,7 +74,7 @@ const questions = [
     option_a: '可以',
     option_b: '不可以',
     correct_answer: 'A',
-    time_limit_high: 12,
+    time_limit_high: 10,
     time_limit_low: 28,
     llm_answer_high:
       '不可以在沉没的“皇家港”遗址进行常规水肺潜水。现有描述基本一致表明，该遗址位于牙买加海岸外较深的水域，其深度已经超出普通休闲水肺潜水的适用范围。再加上海底条件复杂、进入难度高，并且需要更专业的设备与技术支持，普通潜水员通常无法直接进入并安全探索。由此可见，在沉没的“皇家港”遗址进行常规水肺潜水是不现实的。',
