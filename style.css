@@ -21,7 +21,7 @@ h1 {
   font-size: 42px;
 }
 
-h2 {
+h2, h3 {
   margin-top: 0;
 }
 
@@ -68,7 +68,7 @@ button:disabled {
 }
 
 #status,
-#check-status {
+#scale-status {
   margin-top: 22px;
   font-size: 20px;
 }
@@ -83,11 +83,6 @@ button:disabled {
 .option-text {
   font-size: 24px;
   line-height: 1.5;
-}
-
-.rating-block {
-  margin-top: 22px;
-  line-height: 2;
 }
 
 .thinking-text {
@@ -155,4 +150,59 @@ button:disabled {
 
 body.modal-open {
   overflow: hidden;
+}
+
+.consent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.scale-section {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.scale-item {
+  margin-top: 18px;
+  line-height: 1.8;
+}
+
+.scale-item p {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.radio-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.radio-row label {
+  font-size: 16px;
+}
+
+.feedback-block {
+  margin-top: 24px;
+  line-height: 1.8;
+}
+
+.feedback-block textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+#question,
+#ai-answer-text {
+  line-height: 1.8;
+  font-size: 20px;
 }
