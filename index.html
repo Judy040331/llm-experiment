@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>预实验二</title>
+  <title>预测试三：任务状态版量表预测试</title>
   <link rel="stylesheet" href="./style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./script.js" defer></script>
@@ -11,46 +11,44 @@
 <body>
   <div class="container">
 
-    <!-- 进入实验前的说明页 -->
+    <!-- 说明页 -->
     <div id="intro-screen">
       <h1>实验说明</h1>
 
       <div class="card">
-        <p>欢迎参与本实验。</p>
-        <p>本实验旨在研究人在阅读 AI 回答后的判断与信息核查行为。实验过程中，你将看到若干题目、AI 回答以及可选的补充资料，并在有限时间内完成判断。</p>
-        <p>请在时间限制内完成回答! 请在时间限制内完成回答! 请在时间限制内完成回答!（重要的事情说三遍）</p>
+        <p>欢迎参与本研究。</p>
+        <p>本阶段主要用于预测试一套关于 AI 判断任务中思考状态的问卷。</p>
+        <p>你将先完成若干道简短判断题，随后根据刚才的真实思考状态填写问卷。</p>
       </div>
 
       <div class="card">
         <h2>系统说明</h2>
-        <p>本实验中的回答由一个大语言模型问答系统生成，并以对话式文本形式呈现。</p>
-        <p>该系统通常能够生成较为完整、连贯的回答，但其内容不一定始终准确，也可能出现错误、遗漏或误导性表述。</p>
-        <p>实验过程中，你需要基于该系统生成的回答进行判断，并在必要时查看补充资料后完成作答。</p>
+        <p>你将看到题目、AI 回答以及可选的补充资料。AI 回答并不一定始终准确。</p>
+        <p>请根据自己的真实判断完成作答。补充资料可以查看，但不是必须查看。</p>
       </div>
 
       <div class="card">
         <h2>安全声明</h2>
-        <p>本实验不涉及身体风险，不收集敏感身份信息。你在实验中的作答、点击行为与停留时长仅用于学术研究分析。</p>
-        <p>如你同意继续，请点击下方“开始实验”。</p>
+        <p>本研究不收集敏感身份信息。实验中的作答、点击行为与问卷反馈仅用于学术研究。</p>
       </div>
 
       <div class="card">
-        <label style="display:flex; align-items:center; gap:10px; font-size:18px;">
+        <label class="consent-row">
           <input type="checkbox" id="consent-checkbox" />
           我已阅读上述说明，并同意参加本实验
         </label>
 
-        <div style="margin-top:24px;">
+        <div style="margin-top: 24px;">
           <button type="button" id="start-experiment-btn">开始实验</button>
         </div>
 
-        <div id="intro-status" style="margin-top:18px;" aria-live="polite"></div>
+        <div id="intro-status" style="margin-top: 18px;" aria-live="polite"></div>
       </div>
     </div>
 
-    <!-- 原有实验页，初始隐藏 -->
+    <!-- 任务页 -->
     <div id="experiment-screen" style="display: none;">
-      <h1>实验测试</h1>
+      <h1>任务判断</h1>
 
       <div class="top-bar">
         <p>当前题目：第 <span id="progress">1</span> / <span id="total-count">4</span> 题</p>
@@ -110,73 +108,45 @@
       </div>
     </div>
 
-    <!-- 操控检验页，初始隐藏 -->
-    <div id="check-screen" style="display: none; margin-top: 32px;">
+    <!-- 量表页 -->
+    <div id="scale-screen" style="display: none; margin-top: 32px;">
       <div class="card">
         <h2>问卷反馈</h2>
-        <p>请根据刚才整组题目的作答体验进行评价。</p>
+        <p>请回想你刚才答题时的真实思考状态。以下说法只针对你的思考过程，不针对你是否答对。</p>
         <p>评分标准：1 = 非常不同意，4 = 既不同意也不反对，7 = 非常同意。</p>
 
-        <div class="rating-block">
-          <p>1. 刚才作答时，我感到时间很紧。</p>
-          <label><input type="radio" name="time-pressure" value="1"> 1</label>
-          <label><input type="radio" name="time-pressure" value="2"> 2</label>
-          <label><input type="radio" name="time-pressure" value="3"> 3</label>
-          <label><input type="radio" name="time-pressure" value="4"> 4</label>
-          <label><input type="radio" name="time-pressure" value="5"> 5</label>
-          <label><input type="radio" name="time-pressure" value="6"> 6</label>
-          <label><input type="radio" name="time-pressure" value="7"> 7</label>
+        <div id="scale-form"></div>
+
+        <div class="feedback-block">
+          <p>哪些题最难理解？可以直接写题号或简短说明。</p>
+          <textarea id="feedback-confusing" rows="3" placeholder="选填"></textarea>
         </div>
 
-        <div class="rating-block">
-          <p>2. 刚才作答时，我觉得自己是在被催着做决定。</p>
-          <label><input type="radio" name="time-pressure-2" value="1"> 1</label>
-          <label><input type="radio" name="time-pressure-2" value="2"> 2</label>
-          <label><input type="radio" name="time-pressure-2" value="3"> 3</label>
-          <label><input type="radio" name="time-pressure-2" value="4"> 4</label>
-          <label><input type="radio" name="time-pressure-2" value="5"> 5</label>
-          <label><input type="radio" name="time-pressure-2" value="6"> 6</label>
-          <label><input type="radio" name="time-pressure-2" value="7"> 7</label>
+        <div class="feedback-block">
+          <p>哪些题意思很像，显得重复？可以直接写题号或简短说明。</p>
+          <textarea id="feedback-redundant" rows="3" placeholder="选填"></textarea>
         </div>
 
-        <div class="rating-block">
-          <p>3. 刚才这个 LLM 回答看起来很有把握。</p>
-          <label><input type="radio" name="llm-confidence" value="1"> 1</label>
-          <label><input type="radio" name="llm-confidence" value="2"> 2</label>
-          <label><input type="radio" name="llm-confidence" value="3"> 3</label>
-          <label><input type="radio" name="llm-confidence" value="4"> 4</label>
-          <label><input type="radio" name="llm-confidence" value="5"> 5</label>
-          <label><input type="radio" name="llm-confidence" value="6"> 6</label>
-          <label><input type="radio" name="llm-confidence" value="7"> 7</label>
-        </div>
-
-        <div class="rating-block">
-          <p>4. 刚才这个 LLM 回答看起来可信。</p>
-          <label><input type="radio" name="llm-credible" value="1"> 1</label>
-          <label><input type="radio" name="llm-credible" value="2"> 2</label>
-          <label><input type="radio" name="llm-credible" value="3"> 3</label>
-          <label><input type="radio" name="llm-credible" value="4"> 4</label>
-          <label><input type="radio" name="llm-credible" value="5"> 5</label>
-          <label><input type="radio" name="llm-credible" value="6"> 6</label>
-          <label><input type="radio" name="llm-credible" value="7"> 7</label>
-        </div>
-
-        <div class="rating-block">
-          <p>5. 刚才这个 LLM 回答看起来可靠。</p>
-          <label><input type="radio" name="llm-reliable" value="1"> 1</label>
-          <label><input type="radio" name="llm-reliable" value="2"> 2</label>
-          <label><input type="radio" name="llm-reliable" value="3"> 3</label>
-          <label><input type="radio" name="llm-reliable" value="4"> 4</label>
-          <label><input type="radio" name="llm-reliable" value="5"> 5</label>
-          <label><input type="radio" name="llm-reliable" value="6"> 6</label>
-          <label><input type="radio" name="llm-reliable" value="7"> 7</label>
+        <div class="feedback-block">
+          <p>整体上，这些题更像在问什么？</p>
+          <label><input type="radio" name="state-vs-behavior" value="思考状态"> 思考状态</label>
+          <label><input type="radio" name="state-vs-behavior" value="行为结果"> 行为结果</label>
+          <label><input type="radio" name="state-vs-behavior" value="两者都有"> 两者都有</label>
         </div>
 
         <div style="margin-top: 28px;">
-          <button type="button" id="submit-check">提交反馈</button>
+          <button type="button" id="submit-scale">提交问卷</button>
         </div>
 
-        <div id="check-status" style="margin-top: 20px;"></div>
+        <div id="scale-status" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+
+    <!-- 完成页 -->
+    <div id="complete-screen" style="display: none; margin-top: 32px;">
+      <div class="card">
+        <h2>提交成功</h2>
+        <p>你的作答与问卷反馈已保存。感谢参与。</p>
       </div>
     </div>
 
