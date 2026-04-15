@@ -66,16 +66,16 @@ const questions = [
 ];
 
 const scaleItems = [
-  { key: 'isc_1', section: '启动性自我控制', text: '我会继续想，这个回答是否站得住。' },
-  { key: 'isc_2', section: '启动性自我控制', text: '拿不准时，我会再分析一下。' },
+  { key: 'isc_1', section: '启动性自我控制', text: '我会主动继续思考 AI 回答是否真的站得住。' },
+  { key: 'isc_2', section: '启动性自我控制', text: '一时间不能确定答案，我会继续分析而不是立刻决定。' },
   { key: 'isc_3', section: '启动性自我控制', text: '觉得回答不对劲时，我会继续找依据。' },
-  { key: 'isc_4', section: '启动性自我控制', text: '我会主动用自己的想法判断。' },
+  { key: 'isc_4', section: '启动性自我控制', text: '即使判断过程有点费力，我也会尽量把它想清楚。' },
   { key: 'isc_5', section: '启动性自我控制', text: '直觉不够时，我会再想深一点。' },
 
   { key: 'inh_1', section: '抑制性自我控制', text: '我容易顺着 AI 的说法直接作答。' },
-  { key: 'inh_2', section: '抑制性自我控制', text: '我会在没想清楚前就想赶紧选。' },
-  { key: 'inh_3', section: '抑制性自我控制', text: '回答看起来顺时，我就不太想再细想。' },
-  { key: 'inh_4', section: '抑制性自我控制', text: '我会因为想快点结束而少想几步。' },
+  { key: 'inh_2', section: '抑制性自我控制', text: '我容易在还没想清楚时就想尽快做决定。' },
+  { key: 'inh_3', section: '抑制性自我控制', text: 'AI 回答看起来通顺时，我就不太想再细想。' },
+  { key: 'inh_4', section: '抑制性自我控制', text: '我容易因为想快点完成而省略必要的思考。 ' },
   { key: 'inh_5', section: '抑制性自我控制', text: '我很难压住跟着 AI 思路作答的冲动。' }
 ];
 
