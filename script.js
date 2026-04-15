@@ -3,19 +3,17 @@ const supabaseKey = 'sb_publishable_xSr91dyTtRctRmnW4Ip5Kg_zOu4PkEO';
 const { createClient } = supabase;
 const db = createClient(supabaseUrl, supabaseKey);
 
-/*
-  测试模式说明：
-  true  = 不消耗块随机序列，固定使用下面两项条件
-  false = 正式模式，从 Supabase 的 claim_next_assignment() 领取条件
-*/
-const USE_TEST_MODE = false;
-const TEST_CONDITION_TIME = 'high';        // 'high' 或 'low'
-const TEST_CONDITION_CONFIDENCE = 'high';  // 'high' 或 'low'
+const STUDY_PHASE = 'pretest3';
+const STUDY_VERSION = 'pretest3_v1';
 
-// AI展示效果参数：正式实验时建议固定，不要随条件变化
-const AI_THINKING_DELAY_MS = 1200;
-const AI_TYPING_SPEED_MS = 20;
+// 预测试三不做操控，所以统一使用宽松时限
+const TASK_TIME_LIMIT_SECONDS = 45;
 
+// 展示效果参数
+const AI_THINKING_DELAY_MS = 800;
+const AI_TYPING_SPEED_MS = 18;
+
+// 统一使用较中性的回答版本，不再做高低置信度切换
 const questions = [
   {
     id: 1,
@@ -26,11 +24,7 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    time_limit_high: 12,
-    time_limit_low: 28,
-    llm_answer_high:
-      '是的，大猩猩每平方英寸的毛发数量是人类的两倍。比较资料显示，大猩猩的毛发密度明显高于人类；人类平均约为每平方英寸 1,000 到 2,000 根，大猩猩约为 3,000 到 4,000 根。更高的毛发密度有助于它们在凉爽潮湿的环境中维持体温，也能提供额外保护。由此可见，大猩猩每平方英寸毛发数量达到人类两倍这一判断是成立的。',
-    llm_answer_low:
+    llm_answer:
       '这个说法很难说得特别确定，可能是的。现有资料更多是在描述它们看起来更浓密，而不是给出完全一致的密度结论；人类常被写为每平方英寸 1,000 到 2,000 根，大猩猩则常见于 3,000 到 4,000 根左右的说法。这样的比较通常会让人倾向于认为它们毛发更多，也更容易联想到保温和保护作用。综合来看，这更像是依据常见比较得出的一个大致判断。'
   },
   {
@@ -42,11 +36,7 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    time_limit_high: 12,
-    time_limit_low: 28,
-    llm_answer_high:
-      '是的，除了鸭嘴兽，其他哺乳动物都是胎生。常见分类资料把鸭嘴兽视为现存哺乳动物中保留产卵方式的特殊例外，而其余哺乳动物则归入胎盘类或有袋类。胎盘类和有袋类都属于活体分娩，而不是产卵。由此可见，从繁殖方式来看，除鸭嘴兽外其他哺乳动物都应归为胎生。',
-    llm_answer_low:
+    llm_answer:
       '这个说法并不算特别确定，不过应该是的。现有资料更多是在用胎盘类和有袋类来概括大部分哺乳动物，而不是反复强调很多额外例外。胎盘类和有袋类一般也都按活体分娩来理解，而不是产卵。综合来看，这更像是基于常见分类作出的概括性判断。'
   },
   {
@@ -58,11 +48,7 @@ const questions = [
     option_a: '基础泪液',
     option_b: '反射性泪液',
     correct_answer: 'B',
-    time_limit_high: 12,
-    time_limit_low: 28,
-    llm_answer_high:
-      '基础泪液的分泌量比反射性泪液更大。相关生理功能比较表明，基础泪液负责眼表持续润滑和保护，因此泪腺会稳定、连续地分泌这类泪液。相比之下，反射性泪液主要在外界刺激出现时短时增加，其重点是冲洗刺激物，而不是长期维持眼表环境。由此可见，从分泌模式和功能分工来看，基础泪液分泌量更大这一判断是成立的。',
-    llm_answer_low:
+    llm_answer:
       '这个判断没有那么确定，不过一般还是会把基础泪液理解为分泌量更大。现有资料更多是在区分两类眼泪的功能差别：基础泪液负责日常润滑和保护，反射性泪液则在刺激出现时临时增加。这样的区分通常会让人倾向于把基础泪液看得更多，但并不总是直接等于一个很明确的分泌量结论。综合来看，这更像是一种常见解释，而不是特别确定的判断。'
   },
   {
@@ -74,13 +60,23 @@ const questions = [
     option_a: '可以',
     option_b: '不可以',
     correct_answer: 'A',
-    time_limit_high: 12,
-    time_limit_low: 28,
-    llm_answer_high:
-      '不可以在沉没的“皇家港”遗址进行常规水肺潜水。现有描述基本一致表明，该遗址位于牙买加海岸外较深的水域，其深度已经超出普通休闲水肺潜水的适用范围。再加上海底条件复杂、进入难度高，并且需要更专业的设备与技术支持，普通潜水员通常无法直接进入并安全探索。由此可见，在沉没的“皇家港”遗址进行常规水肺潜水是不现实的。',
-    llm_answer_low:
+    llm_answer:
       '这个说法也不能算完全绝对，不过通常还是会把沉没的“皇家港”遗址理解为不适合进行常规水肺潜水。现有描述更多是在强调它位于较深水域、进入条件复杂，并且往往需要更专业的设备与技术支持。这样的信息主要是在说明限制很多，而不一定是在给出一个毫无例外的结论。综合来看，把这里理解为不适合普通常规水肺潜水，更像是基于通常条件作出的判断。'
   }
+];
+
+const scaleItems = [
+  { key: 'isc_1', section: '启动性自我控制', text: '我会继续想，这个回答是否站得住。' },
+  { key: 'isc_2', section: '启动性自我控制', text: '拿不准时，我会再分析一下。' },
+  { key: 'isc_3', section: '启动性自我控制', text: '觉得回答不对劲时，我会继续找依据。' },
+  { key: 'isc_4', section: '启动性自我控制', text: '我会主动用自己的想法判断。' },
+  { key: 'isc_5', section: '启动性自我控制', text: '直觉不够时，我会再想深一点。' },
+
+  { key: 'inh_1', section: '抑制性自我控制', text: '我容易顺着 AI 的说法直接作答。' },
+  { key: 'inh_2', section: '抑制性自我控制', text: '我会在没想清楚前就想赶紧选。' },
+  { key: 'inh_3', section: '抑制性自我控制', text: '回答看起来顺时，我就不太想再细想。' },
+  { key: 'inh_4', section: '抑制性自我控制', text: '我会因为想快点结束而少想几步。' },
+  { key: 'inh_5', section: '抑制性自我控制', text: '我很难压住跟着 AI 思路作答的冲动。' }
 ];
 
 let currentIndex = 0;
@@ -99,15 +95,14 @@ let hasExperimentStarted = false;
 const participantId = getParticipantId();
 const runId = getRunId();
 
-let conditionTime = null;
-let conditionConfidence = null;
 let currentShownAnswer = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('total-count').textContent = questions.length;
-  bindQuestionEvents();
-  bindCheckEvents();
   bindIntroEvents();
+  bindQuestionEvents();
+  bindScaleEvents();
+  renderScaleForm();
 });
 
 function bindIntroEvents() {
@@ -117,12 +112,7 @@ function bindIntroEvents() {
   const introScreen = document.getElementById('intro-screen');
   const experimentScreen = document.getElementById('experiment-screen');
 
-  if (!startBtn || !consentBox || !introStatus || !introScreen || !experimentScreen) {
-    console.error('说明页相关元素缺失，请检查 index.html 的 id 是否一致');
-    return;
-  }
-
-  startBtn.addEventListener('click', async () => {
+  startBtn.addEventListener('click', () => {
     if (hasExperimentStarted) return;
 
     if (!consentBox.checked) {
@@ -137,15 +127,69 @@ function bindIntroEvents() {
     introScreen.style.display = 'none';
     experimentScreen.style.display = 'block';
 
-    if (USE_TEST_MODE) {
-      conditionTime = TEST_CONDITION_TIME;
-      conditionConfidence = TEST_CONDITION_CONFIDENCE;
-      console.log('测试模式条件:', conditionTime, conditionConfidence);
-      renderQuestion(currentQuestion);
-    } else {
-      await initializeExperiment();
-    }
+    renderQuestion(currentQuestion);
   });
+}
+
+function bindQuestionEvents() {
+  document.getElementById('source-btn').addEventListener('click', openSourceModal);
+
+  document.getElementById('go-answer-btn').addEventListener('click', () => {
+    if (hasSubmitted || isTyping) return;
+    document.getElementById('answer-screen').style.display = 'block';
+  });
+
+  document.getElementById('close-source-modal-btn').addEventListener('click', () => {
+    closeSourceModalAndGoAnswer();
+  });
+
+  document.getElementById('btnA').addEventListener('click', async () => {
+    await submitAnswer('A');
+  });
+
+  document.getElementById('btnB').addEventListener('click', async () => {
+    await submitAnswer('B');
+  });
+}
+
+function bindScaleEvents() {
+  document.getElementById('submit-scale').addEventListener('click', async () => {
+    await submitScale();
+  });
+}
+
+function renderScaleForm() {
+  const scaleForm = document.getElementById('scale-form');
+
+  const sections = ['启动性自我控制', '抑制性自我控制'];
+
+  let html = '';
+
+  sections.forEach(sectionName => {
+    html += `<div class="scale-section"><h3>${sectionName}</h3>`;
+
+    scaleItems
+      .filter(item => item.section === sectionName)
+      .forEach((item, idx) => {
+        html += `
+          <div class="scale-item">
+            <p>${idx + 1}. ${item.text}</p>
+            <div class="radio-row">
+              ${[1, 2, 3, 4, 5, 6, 7].map(value => `
+                <label>
+                  <input type="radio" name="${item.key}" value="${value}">
+                  ${value}
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+    html += `</div>`;
+  });
+
+  scaleForm.innerHTML = html;
 }
 
 function getParticipantId() {
@@ -159,32 +203,6 @@ function getParticipantId() {
 
 function getRunId() {
   return 'run_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-}
-
-async function initializeExperiment() {
-  const { data, error } = await db.rpc('claim_next_assignment', {
-    p_run_id: runId,
-    p_participant_id: participantId
-  });
-
-  if (error) {
-    console.error('领取条件失败:', error);
-    document.getElementById('status').textContent = '领取实验条件失败，请查看控制台';
-    disableQuestionFlow();
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    document.getElementById('status').textContent = '当前实验名额已满';
-    disableQuestionFlow();
-    return;
-  }
-
-  conditionTime = data[0].condition_time;
-  conditionConfidence = data[0].condition_confidence;
-
-  console.log('本轮条件:', conditionTime, conditionConfidence);
-  renderQuestion(currentQuestion);
 }
 
 function resetQuestionState() {
@@ -217,14 +235,7 @@ function renderQuestion(q) {
   resetQuestionState();
 
   currentQuestion = q;
-  currentShownAnswer =
-    conditionConfidence === 'high' ? q.llm_answer_high : q.llm_answer_low;
-
-  const timeLimit =
-    conditionTime === 'high' ? q.time_limit_high : q.time_limit_low;
-
-  console.log('当前条件:', conditionTime);
-  console.log('当前时限:', timeLimit);
+  currentShownAnswer = q.llm_answer;
 
   document.getElementById('progress').textContent = currentIndex + 1;
   document.getElementById('question').textContent = q.question_text;
@@ -234,7 +245,7 @@ function renderQuestion(q) {
   document.getElementById('optionB').textContent = q.option_b;
 
   pageStartTime = Date.now();
-  startTimer(timeLimit);
+  startTimer(TASK_TIME_LIMIT_SECONDS);
   showAIAnswerWithEffect(currentShownAnswer);
 }
 
@@ -267,33 +278,6 @@ async function showAIAnswerWithEffect(text) {
   isTyping = false;
   document.getElementById('source-btn').disabled = false;
   document.getElementById('go-answer-btn').disabled = false;
-}
-
-function bindQuestionEvents() {
-  document.getElementById('source-btn').addEventListener('click', openSourceModal);
-
-  document.getElementById('go-answer-btn').addEventListener('click', () => {
-    if (hasSubmitted || isTyping) return;
-    document.getElementById('answer-screen').style.display = 'block';
-  });
-
-  document.getElementById('close-source-modal-btn').addEventListener('click', () => {
-    closeSourceModalAndGoAnswer();
-  });
-
-  document.getElementById('btnA').addEventListener('click', async () => {
-    await submitAnswer('A');
-  });
-
-  document.getElementById('btnB').addEventListener('click', async () => {
-    await submitAnswer('B');
-  });
-}
-
-function bindCheckEvents() {
-  document.getElementById('submit-check').addEventListener('click', async () => {
-    await submitCheck();
-  });
 }
 
 function openSourceModal() {
@@ -374,10 +358,10 @@ async function submitAnswer(answer) {
   const correct = answer === currentQuestion.correct_answer;
 
   const payload = {
+    study_phase: STUDY_PHASE,
+    study_version: STUDY_VERSION,
     run_id: runId,
     participant_id: participantId,
-    condition_time: conditionTime,
-    condition_confidence: conditionConfidence,
     question_id: currentQuestion.id,
     question_text: currentQuestion.question_text,
     llm_answer: currentShownAnswer,
@@ -385,20 +369,16 @@ async function submitAnswer(answer) {
     source_time_ms: sourceTimeMs,
     answer: answer,
     correct: correct,
-    page_time_ms: pageTimeMs,
-    time_pressure_rating: null,
-    llm_credibility_rating: null
+    page_time_ms: pageTimeMs
   };
-
-  console.log('准备写入:', payload);
 
   disableQuestionFlow();
   document.getElementById('status').textContent = '正在保存...';
 
-  const { error } = await db.from('responses').insert([payload]);
+  const { error } = await db.from('task_responses').insert([payload]);
 
   if (error) {
-    console.error('保存失败:', error);
+    console.error('任务保存失败:', error);
     document.getElementById('status').textContent = '保存失败，请查看控制台';
     return;
   }
@@ -409,56 +389,79 @@ async function submitAnswer(answer) {
     setTimeout(() => {
       currentIndex += 1;
       renderQuestion(questions[currentIndex]);
-    }, 1000);
+    }, 800);
   } else {
-    showCheckScreen();
+    showScaleScreen();
   }
 }
 
-function showCheckScreen() {
+function showScaleScreen() {
   clearInterval(timerId);
   document.getElementById('timer').textContent = '0';
   document.getElementById('experiment-screen').style.display = 'none';
-  document.getElementById('check-screen').style.display = 'block';
+  document.getElementById('scale-screen').style.display = 'block';
 }
 
-async function submitCheck() {
-  const tp1 = document.querySelector('input[name="time-pressure"]:checked')?.value;
-  const tp2 = document.querySelector('input[name="time-pressure-2"]:checked')?.value;
-  const lc1 = document.querySelector('input[name="llm-confidence"]:checked')?.value;
-  const lc2 = document.querySelector('input[name="llm-credible"]:checked')?.value;
-  const lc3 = document.querySelector('input[name="llm-reliable"]:checked')?.value;
+async function submitScale() {
+  const values = {};
+  let missingKeys = [];
 
-  if (!tp1 || !tp2 || !lc1 || !lc2 || !lc3) {
-    document.getElementById('check-status').textContent = '请完成所有评分后再提交';
+  scaleItems.forEach(item => {
+    const checked = document.querySelector(`input[name="${item.key}"]:checked`);
+    if (!checked) {
+      missingKeys.push(item.key);
+    } else {
+      values[item.key] = Number(checked.value);
+    }
+  });
+
+  const stateVsBehavior = document.querySelector('input[name="state-vs-behavior"]:checked')?.value;
+  const feedbackConfusing = document.getElementById('feedback-confusing').value.trim();
+  const feedbackRedundant = document.getElementById('feedback-redundant').value.trim();
+
+  if (missingKeys.length > 0 || !stateVsBehavior) {
+    document.getElementById('scale-status').textContent = '请完成所有量表评分，并选择最后一个总体反馈选项';
     return;
   }
 
-  const timePressureAvg = (Number(tp1) + Number(tp2)) / 2;
-  const llmCredibilityAvg = (Number(lc1) + Number(lc2) + Number(lc3)) / 3;
+  document.getElementById('submit-scale').disabled = true;
+  document.getElementById('scale-status').textContent = '正在保存问卷...';
 
-  document.getElementById('submit-check').disabled = true;
-  document.getElementById('check-status').textContent = '正在保存反馈...';
+  const payload = {
+    study_phase: STUDY_PHASE,
+    study_version: STUDY_VERSION,
+    run_id: runId,
+    participant_id: participantId,
 
-  const { data, error } = await db
-    .from('responses')
-    .update({
-      time_pressure_rating: timePressureAvg,
-      llm_credibility_rating: llmCredibilityAvg
-    })
-    .eq('run_id', runId)
-    .select();
+    isc_1: values.isc_1,
+    isc_2: values.isc_2,
+    isc_3: values.isc_3,
+    isc_4: values.isc_4,
+    isc_5: values.isc_5,
 
-  console.log('更新结果:', data);
+    inh_1: values.inh_1,
+    inh_2: values.inh_2,
+    inh_3: values.inh_3,
+    inh_4: values.inh_4,
+    inh_5: values.inh_5,
+
+    feedback_confusing: feedbackConfusing || null,
+    feedback_redundant: feedbackRedundant || null,
+    feedback_state_vs_behavior: stateVsBehavior
+  };
+
+  const { error } = await db.from('scale_responses').insert([payload]);
 
   if (error) {
-    console.error('反馈保存失败:', error);
-    document.getElementById('submit-check').disabled = false;
-    document.getElementById('check-status').textContent = '反馈保存失败，请查看控制台';
+    console.error('量表保存失败:', error);
+    document.getElementById('submit-scale').disabled = false;
+    document.getElementById('scale-status').textContent = '保存失败，请查看控制台';
     return;
   }
 
-  document.getElementById('check-status').textContent = '反馈已提交，实验完成';
+  document.getElementById('scale-status').textContent = '问卷已提交';
+  document.getElementById('scale-screen').style.display = 'none';
+  document.getElementById('complete-screen').style.display = 'block';
 }
 
 function sleep(ms) {
