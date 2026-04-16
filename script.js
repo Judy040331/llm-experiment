@@ -11,7 +11,7 @@ const TASK_TIME_LIMIT_SECONDS = 45;
 
 // 展示效果参数
 const AI_THINKING_DELAY_MS = 1200;
-const AI_TYPING_SPEED_MS = 20;
+const AI_TYPING_SPEED_MS = 50;
 
 // 统一使用回答版本，不再做高低置信度切换
 const questions = [
