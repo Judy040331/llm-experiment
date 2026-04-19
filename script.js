@@ -7,7 +7,7 @@ const db = createClient(supabaseUrl, supabaseKey);
   true  = 测试模式，不消耗块随机名额
   false = 正式模式，从 condition_assignments 领取条件
 */
-const USE_TEST_MODE = true;
+const USE_TEST_MODE = false;
 const TEST_CONDITION_TIME = 'high';
 const TEST_CONDITION_CONFIDENCE = 'high';
 
