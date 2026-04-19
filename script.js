@@ -3,17 +3,20 @@ const supabaseKey = 'sb_publishable_xSr91dyTtRctRmnW4Ip5Kg_zOu4PkEO';
 const { createClient } = supabase;
 const db = createClient(supabaseUrl, supabaseKey);
 
-const STUDY_PHASE = 'pretest3';
-const STUDY_VERSION = 'pretest3_v1';
+/*
+  true  = 测试模式，不消耗块随机名额
+  false = 正式模式，从 condition_assignments 领取条件
+*/
+const USE_TEST_MODE = true;
+const TEST_CONDITION_TIME = 'high';
+const TEST_CONDITION_CONFIDENCE = 'high';
 
-// 预测试三不做操控，所以统一使用宽松时限
-const TASK_TIME_LIMIT_SECONDS = 45;
+const STUDY_PHASE = 'formal_experiment';
+const STUDY_VERSION = 'formal_v3_cond_only_sc';
 
-// 展示效果参数
-const AI_THINKING_DELAY_MS = 1500;
-const AI_TYPING_SPEED_MS = 50;
+const AI_THINKING_DELAY_MS = 1200;
+const AI_TYPING_SPEED_MS = 20;
 
-// 统一使用回答版本，不再做高低置信度切换
 const questions = [
   {
     id: 1,
@@ -24,8 +27,12 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    llm_answer:
-      '是的，大猩猩每平方英寸的毛发数量是人类的两倍。与人类相比，大猩猩的毛发密度显著更高。人类的平均毛发密度约为每平方英寸 1,000 到 2,000 根，而大猩猩则拥有约 3,000 到 4,000 根。这种较高的毛发密度有助于大猩猩在自然栖息地（可能相当凉爽且潮湿）保持体温。它们浓密的皮毛还能抵御昆虫和轻微伤害。因此，大猩猩每平方英寸毛发数量是人类两倍的说法得到了毛发密度对比测量数据的支持。'
+    time_limit_high: 15,
+    time_limit_low: 28,
+    llm_answer_high:
+      '是的，大猩猩每平方英寸的毛发数量是人类的两倍。比较资料显示，大猩猩的毛发密度明显高于人类；人类平均约为每平方英寸 1,000 到 2,000 根，大猩猩约为 3,000 到 4,000 根。更高的毛发密度有助于它们在凉爽潮湿的环境中维持体温，也能提供额外保护。由此可见，大猩猩每平方英寸毛发数量达到人类两倍这一判断是成立的。',
+    llm_answer_low:
+      '这个说法很难说得特别确定，可能是的。现有资料更多是在描述它们看起来更浓密，而不是给出完全一致的密度结论；人类常被写为每平方英寸 1,000 到 2,000 根，大猩猩则常见于 3,000 到 4,000 根左右的说法。这样的比较通常会让人倾向于认为它们毛发更多，也更容易联想到保温和保护作用。综合来看，这更像是依据常见比较得出的一个大致判断。'
   },
   {
     id: 2,
@@ -36,8 +43,12 @@ const questions = [
     option_a: '是',
     option_b: '不是',
     correct_answer: 'B',
-    llm_answer:
-      '是的，除了鸭嘴兽，所有哺乳动物都是胎生。除了鸭嘴兽（极少数单孔目动物之一）外，所有其他哺乳动物都是胎盘类或有袋类，产下活体幼崽。单孔目动物（如鸭嘴兽和针鼹）在哺乳动物中非常独特，因为它们产卵。相比之下，占哺乳动物绝大部分的胎盘类动物在子宫内发育幼崽并产下活体后代。有袋类也产下活体幼崽，尽管它们在发育的极早期出生，并在母亲的育儿袋中继续生长。因此，除单孔目外，所有其他哺乳动物都是胎生。'
+    time_limit_high: 15,
+    time_limit_low: 28,
+    llm_answer_high:
+      '是的，除了鸭嘴兽，其他哺乳动物都是胎生。常见分类资料把鸭嘴兽视为现存哺乳动物中保留产卵方式的特殊例外，而其余哺乳动物则归入胎盘类或有袋类。胎盘类和有袋类都属于活体分娩，而不是产卵。由此可见，从繁殖方式来看，除鸭嘴兽外其他哺乳动物都应归为胎生。',
+    llm_answer_low:
+      '这个说法并不算特别确定，不过应该是的。现有资料更多是在用胎盘类和有袋类来概括大部分哺乳动物，而不是反复强调很多额外例外。胎盘类和有袋类一般也都按活体分娩来理解，而不是产卵。综合来看，这更像是基于常见分类作出的概括性判断。'
   },
   {
     id: 3,
@@ -48,8 +59,12 @@ const questions = [
     option_a: '基础泪液',
     option_b: '反射性泪液',
     correct_answer: 'B',
-    llm_answer:
-      '基础泪液的分泌量比反射性泪液大。因为基础泪液对于眼睛的持续润滑和保护至关重要，泪腺会以稳定的速率分泌基础泪液，以维持眼球表面湿润。相比之下，反射性泪液仅在受到洋葱或异物刺激时产生，并不会持续大量分泌。它们只承担冲洗刺激物的临时功能，在常规眼部维护中不需要像基础泪液那样的分泌量。'
+    time_limit_high: 15,
+    time_limit_low: 28,
+    llm_answer_high:
+      '基础泪液的分泌量比反射性泪液更大。相关生理功能比较表明，基础泪液负责眼表持续润滑和保护，因此泪腺会稳定、连续地分泌这类泪液。相比之下，反射性泪液主要在外界刺激出现时短时增加，其重点是冲洗刺激物，而不是长期维持眼表环境。由此可见，从分泌模式和功能分工来看，基础泪液分泌量更大这一判断是成立的。',
+    llm_answer_low:
+      '这个判断没有那么确定，不过一般还是会把基础泪液理解为分泌量更大。现有资料更多是在区分两类眼泪的功能差别：基础泪液负责日常润滑和保护，反射性泪液则在刺激出现时临时增加。这样的区分通常会让人倾向于把基础泪液看得更多，但并不总是直接等于一个很明确的分泌量结论。综合来看，这更像是一种常见解释，而不是特别确定的判断。'
   },
   {
     id: 4,
@@ -60,23 +75,13 @@ const questions = [
     option_a: '可以',
     option_b: '不可以',
     correct_answer: 'A',
-    llm_answer:
-      '不可以。在沉没的皇家港遗址进行水肺潜水是不可能的，因为它位于牙买加海岸外的深水区。这座在 1692 年地震中沉没的城市所处的水深超出了休闲水肺潜水的范围。深度结合挑战性的水下条件以及对专业设备的需求，使得普通潜水员无法进入。此外，该遗址主要通过考古和遥感方法进行研究保护，而非由潜水员直接探索。'
+    time_limit_high: 15,
+    time_limit_low: 28,
+    llm_answer_high:
+      '不可以在沉没的“皇家港”遗址进行常规水肺潜水。现有描述基本一致表明，该遗址位于牙买加海岸外较深的水域，其深度已经超出普通休闲水肺潜水的适用范围。再加上海底条件复杂、进入难度高，并且需要更专业的设备与技术支持，普通潜水员通常无法直接进入并安全探索。由此可见，在沉没的“皇家港”遗址进行常规水肺潜水是不现实的。',
+    llm_answer_low:
+      '这个说法也不能算完全绝对，不过通常还是会把沉没的“皇家港”遗址理解为不适合进行常规水肺潜水。现有描述更多是在强调它位于较深水域、进入条件复杂，并且往往需要更专业的设备与技术支持。这样的信息主要是在说明限制很多，而不一定是在给出一个毫无例外的结论。综合来看，把这里理解为不适合普通常规水肺潜水，更像是基于通常条件作出的判断。'
   }
-];
-
-const scaleItems = [
-  { key: 'isc_1', section: '启动性自我控制', text: '我会主动继续思考 AI 回答是否真的站得住。' },
-  { key: 'isc_2', section: '启动性自我控制', text: '一时间不能确定答案，我会继续分析而不是立刻决定。' },
-  { key: 'isc_3', section: '启动性自我控制', text: '觉得回答不对劲时，我会继续找依据。' },
-  { key: 'isc_4', section: '启动性自我控制', text: '即使判断过程有点费力，我也会尽量把它想清楚。' },
-  { key: 'isc_5', section: '启动性自我控制', text: '直觉不够时，我会再想深一点。' },
-
-  { key: 'inh_1', section: '抑制性自我控制', text: '我容易顺着 AI 的说法直接作答。' },
-  { key: 'inh_2', section: '抑制性自我控制', text: '我容易在还没想清楚时就想尽快做决定。' },
-  { key: 'inh_3', section: '抑制性自我控制', text: 'AI 回答看起来通顺时，我就不太想再细想。' },
-  { key: 'inh_4', section: '抑制性自我控制', text: '我容易因为想快点完成而省略必要的思考。 ' },
-  { key: 'inh_5', section: '抑制性自我控制', text: '我很难压住跟着 AI 思路作答的冲动。' }
 ];
 
 let currentIndex = 0;
@@ -90,45 +95,155 @@ let sourceOpenedAt = null;
 let sourceTimeMs = 0;
 let hasSubmitted = false;
 let isTyping = false;
-let hasExperimentStarted = false;
+let hasPresurveySubmitted = false;
 
 const participantId = getParticipantId();
 const runId = getRunId();
 
+let conditionTime = null;
+let conditionConfidence = null;
+let assignedSeqNo = null;
 let currentShownAnswer = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('total-count').textContent = questions.length;
+  renderAllRadioRows();
   bindIntroEvents();
+  bindPresurveyEvents();
   bindQuestionEvents();
-  bindScaleEvents();
-  renderScaleForm();
+  bindPostsurveyEvents();
 });
+
+function renderAllRadioRows() {
+  document.querySelectorAll('.radio-row').forEach(row => {
+    const name = row.dataset.name;
+    row.innerHTML = [1, 2, 3, 4, 5, 6, 7].map(value => `
+      <label>
+        <input type="radio" name="${name}" value="${value}">
+        ${value}
+      </label>
+    `).join('');
+  });
+}
 
 function bindIntroEvents() {
   const startBtn = document.getElementById('start-experiment-btn');
   const consentBox = document.getElementById('consent-checkbox');
   const introStatus = document.getElementById('intro-status');
-  const introScreen = document.getElementById('intro-screen');
-  const experimentScreen = document.getElementById('experiment-screen');
 
   startBtn.addEventListener('click', () => {
-    if (hasExperimentStarted) return;
-
     if (!consentBox.checked) {
-      introStatus.textContent = '请先勾选同意参加实验后再开始';
+      introStatus.textContent = '请先勾选知情同意后再继续';
       return;
     }
 
-    hasExperimentStarted = true;
-    startBtn.disabled = true;
     introStatus.textContent = '';
+    document.getElementById('intro-screen').style.display = 'none';
+    document.getElementById('presurvey-screen').style.display = 'block';
+  });
+}
 
-    introScreen.style.display = 'none';
-    experimentScreen.style.display = 'block';
+function bindPresurveyEvents() {
+  const btn = document.getElementById('submit-presurvey-btn');
+  if (!btn) return;
 
+  btn.addEventListener('click', async () => {
+    if (hasPresurveySubmitted) return;
+
+    const basicPayload = buildPresurveyPayload();
+    if (!basicPayload) return;
+
+    hasPresurveySubmitted = true;
+    btn.disabled = true;
+    document.getElementById('presurvey-status').textContent = '正在领取实验条件并保存前测...';
+
+    if (USE_TEST_MODE) {
+      conditionTime = TEST_CONDITION_TIME;
+      conditionConfidence = TEST_CONDITION_CONFIDENCE;
+      assignedSeqNo = 0;
+    } else {
+      const { data, error } = await db.rpc('claim_next_assignment', {
+        p_run_id: runId,
+        p_participant_id: participantId
+      });
+
+      if (error) {
+        console.error('领取条件失败:', error);
+        hasPresurveySubmitted = false;
+        btn.disabled = false;
+        document.getElementById('presurvey-status').textContent = '领取实验条件失败，请查看控制台';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        hasPresurveySubmitted = false;
+        btn.disabled = false;
+        document.getElementById('presurvey-status').textContent = '当前实验名额已满';
+        return;
+      }
+
+      assignedSeqNo = data[0].seq_no;
+      conditionTime = data[0].condition_time;
+      conditionConfidence = data[0].condition_confidence;
+    }
+
+    const payload = {
+      ...basicPayload,
+      seq_no: assignedSeqNo,
+      condition_time: conditionTime,
+      condition_confidence: conditionConfidence
+    };
+
+    const { error: insertError } = await db.from('formal_presurvey').insert([payload]);
+
+    if (insertError) {
+      console.error('实验前问卷保存失败:', insertError);
+      hasPresurveySubmitted = false;
+      btn.disabled = false;
+      document.getElementById('presurvey-status').textContent = '保存失败，请查看控制台';
+      return;
+    }
+
+    document.getElementById('presurvey-screen').style.display = 'none';
+    document.getElementById('experiment-screen').style.display = 'block';
     renderQuestion(currentQuestion);
   });
+}
+
+function buildPresurveyPayload() {
+  const ageGroup = document.getElementById('age_group')?.value || '';
+  const gender = document.getElementById('gender')?.value || '';
+  const educationStage = document.getElementById('education_stage')?.value || '';
+  const majorCategory = document.getElementById('major_category')?.value || '';
+  const llmUseFrequency = document.getElementById('llm_use_frequency')?.value || '';
+  const llmSkill = getRadioValue('llm_skill');
+
+  if (!ageGroup || !gender || !educationStage || !majorCategory || !llmUseFrequency) {
+    document.getElementById('presurvey-status').textContent = '请完成所有前测信息后再提交';
+    return null;
+  }
+
+  if (!llmSkill) {
+    document.getElementById('presurvey-status').textContent = '请完成 LLM 熟悉度评分后再提交';
+    return null;
+  }
+
+  document.getElementById('presurvey-status').textContent = '';
+
+  return {
+    study_phase: STUDY_PHASE,
+    study_version: STUDY_VERSION,
+    run_id: runId,
+    participant_id: participantId,
+    consented: true,
+    consent_version: 'formal_v3_consent',
+    age_group: ageGroup,
+    gender: gender,
+    education_stage: educationStage,
+    major_category: majorCategory,
+    llm_use_frequency: llmUseFrequency,
+    llm_skill: Number(llmSkill)
+  };
 }
 
 function bindQuestionEvents() {
@@ -139,9 +254,7 @@ function bindQuestionEvents() {
     document.getElementById('answer-screen').style.display = 'block';
   });
 
-  document.getElementById('close-source-modal-btn').addEventListener('click', () => {
-    closeSourceModalAndGoAnswer();
-  });
+  document.getElementById('close-source-modal-btn').addEventListener('click', closeSourceModalAndGoAnswer);
 
   document.getElementById('btnA').addEventListener('click', async () => {
     await submitAnswer('A');
@@ -152,57 +265,26 @@ function bindQuestionEvents() {
   });
 }
 
-function bindScaleEvents() {
-  document.getElementById('submit-scale').addEventListener('click', async () => {
-    await submitScale();
+function bindPostsurveyEvents() {
+  document.getElementById('submit-postsurvey').addEventListener('click', async () => {
+    await submitPostsurvey();
   });
-}
-
-function renderScaleForm() {
-  const scaleForm = document.getElementById('scale-form');
-
-  const sections = ['启动性自我控制', '抑制性自我控制'];
-
-  let html = '';
-
-  sections.forEach(sectionName => {
-    html += `<div class="scale-section"><h3>${sectionName}</h3>`;
-
-    scaleItems
-      .filter(item => item.section === sectionName)
-      .forEach((item, idx) => {
-        html += `
-          <div class="scale-item">
-            <p>${idx + 1}. ${item.text}</p>
-            <div class="radio-row">
-              ${[1, 2, 3, 4, 5, 6, 7].map(value => `
-                <label>
-                  <input type="radio" name="${item.key}" value="${value}">
-                  ${value}
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      });
-
-    html += `</div>`;
-  });
-
-  scaleForm.innerHTML = html;
 }
 
 function getParticipantId() {
   const existing = sessionStorage.getItem('participant_id');
   if (existing) return existing;
-
   const newId = 'p_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
   sessionStorage.setItem('participant_id', newId);
   return newId;
 }
 
 function getRunId() {
-  return 'run_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+  const existing = sessionStorage.getItem('run_id');
+  if (existing) return existing;
+  const newId = 'run_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+  sessionStorage.setItem('run_id', newId);
+  return newId;
 }
 
 function resetQuestionState() {
@@ -235,7 +317,8 @@ function renderQuestion(q) {
   resetQuestionState();
 
   currentQuestion = q;
-  currentShownAnswer = q.llm_answer;
+  currentShownAnswer = conditionConfidence === 'high' ? q.llm_answer_high : q.llm_answer_low;
+  const timeLimit = conditionTime === 'high' ? q.time_limit_high : q.time_limit_low;
 
   document.getElementById('progress').textContent = currentIndex + 1;
   document.getElementById('question').textContent = q.question_text;
@@ -245,7 +328,7 @@ function renderQuestion(q) {
   document.getElementById('optionB').textContent = q.option_b;
 
   pageStartTime = Date.now();
-  startTimer(TASK_TIME_LIMIT_SECONDS);
+  startTimer(timeLimit);
   showAIAnswerWithEffect(currentShownAnswer);
 }
 
@@ -355,18 +438,24 @@ async function submitAnswer(answer) {
   document.getElementById('ai-thinking').style.display = 'none';
 
   const pageTimeMs = Date.now() - pageStartTime;
-  const correct = answer === currentQuestion.correct_answer;
+  const responseStatus = answer === 'timeout' ? 'timeout' : 'answered';
+  const selectedOption = answer === 'A' || answer === 'B' ? answer : null;
+  const correct = selectedOption === currentQuestion.correct_answer;
 
   const payload = {
     study_phase: STUDY_PHASE,
     study_version: STUDY_VERSION,
     run_id: runId,
     participant_id: participantId,
+    condition_time: conditionTime,
+    condition_confidence: conditionConfidence,
     question_id: currentQuestion.id,
     question_text: currentQuestion.question_text,
     llm_answer: currentShownAnswer,
     clicked_source: clickedSource,
     source_time_ms: sourceTimeMs,
+    response_status: responseStatus,
+    selected_option: selectedOption,
     answer: answer,
     correct: correct,
     page_time_ms: pageTimeMs
@@ -375,93 +464,87 @@ async function submitAnswer(answer) {
   disableQuestionFlow();
   document.getElementById('status').textContent = '正在保存...';
 
-  const { error } = await db.from('task_responses').insert([payload]);
+  const { error } = await db.from('formal_task_responses').insert([payload]);
 
   if (error) {
-    console.error('任务保存失败:', error);
+    console.error('保存失败:', error);
     document.getElementById('status').textContent = '保存失败，请查看控制台';
     return;
   }
 
   if (currentIndex < questions.length - 1) {
     document.getElementById('status').textContent = '本题已保存，正在进入下一题...';
-
     setTimeout(() => {
       currentIndex += 1;
       renderQuestion(questions[currentIndex]);
-    }, 800);
+    }, 1000);
   } else {
-    showScaleScreen();
+    showPostscreen();
   }
 }
 
-function showScaleScreen() {
+function showPostscreen() {
   clearInterval(timerId);
   document.getElementById('timer').textContent = '0';
   document.getElementById('experiment-screen').style.display = 'none';
-  document.getElementById('scale-screen').style.display = 'block';
+  document.getElementById('postscreen').style.display = 'block';
 }
 
-async function submitScale() {
+function getRadioValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value;
+}
+
+async function submitPostsurvey() {
+  const fieldNames = [
+    'isc_1', 'isc_2', 'isc_3', 'isc_4',
+    'inh_1', 'inh_2', 'inh_3', 'inh_4'
+  ];
+
   const values = {};
-  let missingKeys = [];
-
-  scaleItems.forEach(item => {
-    const checked = document.querySelector(`input[name="${item.key}"]:checked`);
-    if (!checked) {
-      missingKeys.push(item.key);
-    } else {
-      values[item.key] = Number(checked.value);
+  for (const name of fieldNames) {
+    const value = getRadioValue(name);
+    if (!value) {
+      document.getElementById('postscreen-status').textContent = '请完成所有评分后再提交';
+      return;
     }
-  });
-
-  const stateVsBehavior = document.querySelector('input[name="state-vs-behavior"]:checked')?.value;
-  const feedbackConfusing = document.getElementById('feedback-confusing').value.trim();
-  const feedbackRedundant = document.getElementById('feedback-redundant').value.trim();
-
-  if (missingKeys.length > 0 || !stateVsBehavior) {
-    document.getElementById('scale-status').textContent = '请完成所有量表评分，并选择最后一个总体反馈选项';
-    return;
+    values[name] = Number(value);
   }
 
-  document.getElementById('submit-scale').disabled = true;
-  document.getElementById('scale-status').textContent = '正在保存问卷...';
+  document.getElementById('submit-postsurvey').disabled = true;
+  document.getElementById('postscreen-status').textContent = '正在保存反馈...';
 
   const payload = {
     study_phase: STUDY_PHASE,
     study_version: STUDY_VERSION,
     run_id: runId,
     participant_id: participantId,
-
+    condition_time: conditionTime,
+    condition_confidence: conditionConfidence,
     isc_1: values.isc_1,
     isc_2: values.isc_2,
     isc_3: values.isc_3,
     isc_4: values.isc_4,
-    isc_5: values.isc_5,
-
     inh_1: values.inh_1,
     inh_2: values.inh_2,
     inh_3: values.inh_3,
-    inh_4: values.inh_4,
-    inh_5: values.inh_5,
-
-    feedback_confusing: feedbackConfusing || null,
-    feedback_redundant: feedbackRedundant || null,
-    feedback_state_vs_behavior: stateVsBehavior
+    inh_4: values.inh_4
   };
 
-  const { error } = await db.from('scale_responses').insert([payload]);
+  const { error } = await db.from('formal_postsurvey').insert([payload]);
 
   if (error) {
-    console.error('量表保存失败:', error);
-    document.getElementById('submit-scale').disabled = false;
-    document.getElementById('scale-status').textContent = '保存失败，请查看控制台';
+    console.error('反馈保存失败:', error);
+    document.getElementById('submit-postsurvey').disabled = false;
+    document.getElementById('postscreen-status').textContent = '反馈保存失败，请查看控制台';
     return;
   }
 
-  document.getElementById('scale-status').textContent = '问卷已提交';
-  document.getElementById('scale-screen').style.display = 'none';
+  document.getElementById('postscreen-status').textContent = '反馈已提交，实验完成';
+  document.getElementById('postscreen').style.display = 'none';
   document.getElementById('complete-screen').style.display = 'block';
+
+  sessionStorage.removeItem('run_id');
+  sessionStorage.removeItem('participant_id');
 }
 
 function sleep(ms) {
