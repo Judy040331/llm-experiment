@@ -61,14 +61,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
-#timer,
-#modal-timer {
+#timer, #modal-timer {
   color: #d40000;
   font-weight: bold;
 }
 
-#status,
-#scale-status {
+#status, #postscreen-status, #presurvey-status {
   margin-top: 22px;
   font-size: 20px;
 }
@@ -186,23 +184,31 @@ body.modal-open {
   font-size: 16px;
 }
 
-.feedback-block {
-  margin-top: 24px;
+#question, #ai-answer-text {
   line-height: 1.8;
+  font-size: 20px;
 }
 
-.feedback-block textarea {
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.field-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.field-group select {
   width: 100%;
-  box-sizing: border-box;
-  padding: 12px;
+  padding: 10px 12px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  resize: vertical;
-}
-
-#question,
-#ai-answer-text {
-  line-height: 1.8;
-  font-size: 20px;
+  box-sizing: border-box;
+  background: #fff;
 }
